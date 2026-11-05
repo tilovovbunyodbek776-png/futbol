@@ -1,0 +1,16 @@
+# Lokal ishlab chiqish uchun sozlamalar (git'ga qo'shilmaydi)
+# Bot tokeni: @BotFather -> /myapps -> Mini App bot -> API token
+TELEGRAM_BOT_TOKEN=""
+
+# Admin panel paroli (brauzerdan kirish uchun)
+ADMIN_PASSWORD="admin123"
+
+# Telegram ID'lari vergul bilan. Bu ID'lar admin huquqiga ega bo'ladi.
+# O'z ID'ingizni @userinfobot orqali bilib oling.
+ADMIN_IDS=""
+
+# 1 = Telegram tashqarisida (brauzerda) "Mehmon" foydalanuvchisi bilan sinash mumkin
+DEV_MODE="1"
+
+# O'zbekiston vaqti (UTC+5)
+TZ_OFFSET_MINUTES="300"

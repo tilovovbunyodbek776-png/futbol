@@ -1,0 +1,15 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "futbol-maydon-bron",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-10-01",
+  "observability": { "enabled": true },
+  "dev": { "port": 8787 },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "football-booking",
+      "database_id": "8b1f2c34-5d6e-4f70-9a12-3bc4de5f6a78"
+    }
+  ]
+}

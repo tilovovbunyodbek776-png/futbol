@@ -8,10 +8,20 @@ export type TgUser = {
 
 const encoder = new TextEncoder();
 
+/** Kalitni Web Crypto qabul qiladigan toza ArrayBuffer ko'rinishiga keltiradi. */
+function toBufferSource(key: ArrayBuffer | Uint8Array): ArrayBuffer {
+  if (key instanceof Uint8Array) {
+    const copy = new ArrayBuffer(key.byteLength);
+    new Uint8Array(copy).set(key);
+    return copy;
+  }
+  return key;
+}
+
 async function hmac(key: ArrayBuffer | Uint8Array, data: string): Promise<ArrayBuffer> {
   const cryptoKey = await crypto.subtle.importKey(
     'raw',
-    key instanceof Uint8Array ? key : new Uint8Array(key),
+    toBufferSource(key),
     { name: 'HMAC', hash: 'SHA-256' },
     false,
     ['sign'],
@@ -81,6 +91,36 @@ export async function verifyAdminToken(token: string, password?: string): Promis
   if (!exp || !signature || exp < Math.floor(Date.now() / 1000)) return false;
   const expected = toHex(await hmac(encoder.encode(`admin:${password}`), `admin-session:${exp}`));
   return safeEqual(signature, expected);
+}
+
+/* ------------------------------ sayt sessiyasi ----------------------------- */
+
+const WEB_PREFIX = 'w1.';
+
+/** Brauzerdan kirgan foydalanuvchi uchun imzolangan sessiya tokeni. */
+export async function signWebToken(
+  userId: number,
+  secret: string,
+  ttlSeconds = 60 * 60 * 24 * 30,
+): Promise<string> {
+  const exp = Math.floor(Date.now() / 1000) + ttlSeconds;
+  const signature = toHex(await hmac(encoder.encode(secret), `web-session:${userId}:${exp}`));
+  return `${WEB_PREFIX}${userId}.${exp}.${signature}`;
+}
+
+export async function verifyWebToken(token: string, secret: string): Promise<number | null> {
+  if (!token || !secret || !token.startsWith(WEB_PREFIX)) return null;
+
+  const [idRaw, expRaw, signature] = token.slice(WEB_PREFIX.length).split('.');
+  if (!idRaw || !expRaw || !signature) return null;
+
+  const userId = Number(idRaw);
+  const exp = Number(expRaw);
+  if (!Number.isInteger(userId) || userId <= 0 || !exp) return null;
+  if (exp < Math.floor(Date.now() / 1000)) return null;
+
+  const expected = toHex(await hmac(encoder.encode(secret), `web-session:${userId}:${exp}`));
+  return safeEqual(signature, expected) ? userId : null;
 }
 
 export function checkPassword(input: string, expected?: string): boolean {

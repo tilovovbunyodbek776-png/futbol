@@ -2,7 +2,15 @@ import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { api, setAdminToken } from '../api';
 import type { Booking, Field, Me, Stats } from '../types';
 import { confirmAction, haptic } from '../telegram';
-import { formatDateHuman, formatPrice, STATUS_LABEL, todayISO } from '../utils';
+import {
+  formatDateHuman,
+  formatPrice,
+  formatWorkingHours,
+  PAYMENT_LABEL,
+  PAYMENT_STATUS_LABEL,
+  STATUS_LABEL,
+  todayISO,
+} from '../utils';
 
 const STATUS_OPTIONS: { value: Booking['status']; label: string }[] = [
   { value: 'pending', label: 'Kutilmoqda' },
@@ -191,6 +199,9 @@ function BookingsAdmin() {
             <div>
               <p className="booking__name">{b.user_name}</p>
               {b.username && <p className="muted muted--tiny">@{b.username}</p>}
+              <p className="muted muted--tiny">
+                To‘lov: {PAYMENT_LABEL[b.payment_method]} · {PAYMENT_STATUS_LABEL[b.payment_status]}
+              </p>
             </div>
             {b.phone && (
               <a className="phonelink" href={`tel:${b.phone}`}>
@@ -289,7 +300,7 @@ function FieldsAdmin() {
           <div className="fieldrow__info">
             <h4 className="booking__title">{field.name}</h4>
             <p className="muted muted--tiny">
-              {field.open_time} – {field.close_time} · {formatPrice(field.price_per_hour)}/soat
+              {formatWorkingHours(field.open_time, field.close_time)} · {formatPrice(field.price_per_hour)}/soat
             </p>
             {field.address && <p className="muted muted--tiny">📍 {field.address}</p>}
           </div>

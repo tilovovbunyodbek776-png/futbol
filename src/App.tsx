@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
-import { api } from './api';
+import { api, setUserToken } from './api';
 import type { Field, Me } from './types';
 import { initials } from './utils';
-import { tg } from './telegram';
+import { isTelegram, tg } from './telegram';
 import FieldsView from './views/FieldsView';
 import BookingView from './views/BookingView';
 import MyBookingsView from './views/MyBookingsView';
 import AdminView from './views/AdminView';
+import LoginView from './views/LoginView';
 
 type Tab = 'fields' | 'my' | 'admin';
 
@@ -85,6 +86,18 @@ export default function App() {
     setTab('fields');
   };
 
+  const logout = () => {
+    setUserToken(null);
+    setField(null);
+    setTab('fields');
+    setMe(null);
+    void loadMe();
+  };
+
+  const signedIn = Boolean(me?.user);
+  // Kirish ekranidan admin panelga ham o'tish mumkin (parol bilan)
+  const showAdminGate = !signedIn && tab === 'admin';
+
   return (
     <div className="app">
       <header className="topbar">
@@ -95,7 +108,14 @@ export default function App() {
             <h1 className="topbar__title">Futbol Maydoni</h1>
           </div>
         </div>
-        {me?.user && <div className="avatar">{initials(`${me.user.first_name} ${me.user.last_name ?? ''}`)}</div>}
+        <div className="topbar__user">
+          {me?.user && <div className="avatar">{initials(`${me.user.first_name} ${me.user.last_name ?? ''}`)}</div>}
+          {signedIn && !isTelegram() && (
+            <button className="topbar__logout" onClick={logout}>
+              Chiqish
+            </button>
+          )}
+        </div>
       </header>
 
       {!me && !error && (
@@ -116,7 +136,7 @@ export default function App() {
         </div>
       )}
 
-      {me && (
+      {me && signedIn && (
         <>
           {field ? (
             <BookingView field={field} me={me} onBack={() => setField(null)} onGoToMy={() => { setField(null); setTab('my'); }} />
@@ -143,6 +163,21 @@ export default function App() {
             </nav>
           )}
         </>
+      )}
+
+      {me && !signedIn && (
+        <div className="stack">
+          {showAdminGate && (
+            <button className="backlink" onClick={() => setTab('fields')}>
+              ← Bosh sahifa
+            </button>
+          )}
+          {showAdminGate ? (
+            <AdminView me={me} onAuthChanged={() => void loadMe()} />
+          ) : (
+            <LoginView onDone={() => void loadMe()} onAdmin={() => setTab('admin')} />
+          )}
+        </div>
       )}
     </div>
   );

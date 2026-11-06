@@ -11,6 +11,9 @@ export type Field = {
 
 export type Slot = { time: string; label: string; available: boolean };
 
+export type PaymentMethod = 'payme' | 'click' | 'arrival';
+export type PaymentStatus = 'unpaid' | 'pending' | 'paid';
+
 export type Booking = {
   id: number;
   field_id: number;
@@ -22,6 +25,8 @@ export type Booking = {
   hours: number;
   total_price: number;
   status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
+  payment_method: PaymentMethod;
+  payment_status: PaymentStatus;
   created_at: string;
   phone?: string;
   user_name?: string;
@@ -35,7 +40,7 @@ export type TgUser = {
   username?: string;
 };
 
-export type Me = { user: TgUser | null; isAdmin: boolean; devMode: boolean };
+export type Me = { user: TgUser | null; isAdmin: boolean; phone: string | null };
 
 export type Stats = {
   today: { bookings: number; revenue: number };

@@ -28,6 +28,9 @@ declare global {
 
 export const tg = () => window.Telegram?.WebApp;
 
+/** Sayt Telegram ichida emas, oddiy brauzerda ochilganmi. */
+export const isTelegram = () => Boolean(window.Telegram?.WebApp?.initData);
+
 export function haptic(kind: 'tap' | 'success' | 'error' = 'tap') {
   const h = tg()?.HapticFeedback;
   if (!h) return;

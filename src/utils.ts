@@ -1,4 +1,4 @@
-import type { Booking } from './types';
+import type { Booking, PaymentMethod, PaymentStatus } from './types';
 
 const pad = (n: number) => String(n).padStart(2, '0');
 
@@ -12,6 +12,10 @@ export const toISODate = (date: Date) =>
   `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 
 export const todayISO = () => toISODate(new Date());
+
+/** Ochilish va yopilish vaqti teng bo'lsa (00:00–00:00) — kun bo'yi 24/7. */
+export const formatWorkingHours = (open: string, close: string) =>
+  open === close ? '24/7' : `${open} – ${close}`;
 
 export const addDaysISO = (iso: string, days: number) => {
   const d = new Date(`${iso}T12:00:00`);
@@ -29,6 +33,18 @@ export const formatDateHuman = (iso: string) => {
 export const formatDateFull = (iso: string) => {
   const d = parseISODate(iso);
   return `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}, ${WEEKDAYS[d.getDay()]}`;
+};
+
+export const PAYMENT_LABEL: Record<PaymentMethod, string> = {
+  payme: 'Payme',
+  click: 'Click',
+  arrival: 'Joyida to‘lash',
+};
+
+export const PAYMENT_STATUS_LABEL: Record<PaymentStatus, string> = {
+  unpaid: 'To‘lanmagan',
+  pending: 'To‘lov kutilmoqda',
+  paid: 'To‘langan',
 };
 
 export const STATUS_LABEL: Record<Booking['status'], string> = {

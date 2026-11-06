@@ -9,8 +9,25 @@ ADMIN_PASSWORD="admin123"
 # O'z ID'ingizni @userinfobot orqali bilib oling.
 ADMIN_IDS=""
 
-# 1 = Telegram tashqarisida (brauzerda) "Mehmon" foydalanuvchisi bilan sinash mumkin
-DEV_MODE="1"
+# Saytga telefon raqami bilan kirgan foydalanuvchi sessiyasini imzolash uchun kalit.
+# Uzun va tasodifiy bo'lsin. Bo'sh bo'lsa ADMIN_PASSWORD ishlatiladi.
+SESSION_SECRET=""
 
 # O'zbekiston vaqti (UTC+5)
 TZ_OFFSET_MINUTES="300"
+
+# --- To'lov tizimlari -------------------------------------------------------
+# Payme: merchant kabinet -> Web-kassa. Merchant ID va kalit.
+PAYME_MERCHANT_ID=""
+PAYME_KEY=""
+
+# Click: merchant kabinet -> Shop API. service_id, merchant_id, secret key.
+CLICK_SERVICE_ID=""
+CLICK_MERCHANT_ID=""
+CLICK_SECRET_KEY=""
+
+# To'lovdan keyin qaytadigan sayt manzili (masalan https://maydon.uz)
+APP_URL=""
+
+# 1 = Payme/Click o'rniga soxta sinov to'lov sahifasi. Faqat lokal sinov uchun!
+PAYMENTS_SIMULATE="0"

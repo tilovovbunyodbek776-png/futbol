@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800" role="img" aria-label="7x7 mini-futbol maydoni">
+  <defs>
+    <linearGradient id="turf" x1="0" y1="0" x2="0.25" y2="1">
+      <stop offset="0" stop-color="#3aa35d"/>
+      <stop offset="0.55" stop-color="#2b854c"/>
+      <stop offset="1" stop-color="#1b5f37"/>
+    </linearGradient>
+    <pattern id="mow" width="150" height="800" patternUnits="userSpaceOnUse">
+      <rect width="75" height="800" fill="#ffffff" opacity="0.045"/>
+    </pattern>
+    <linearGradient id="light" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.26"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="vignette" cx="0.5" cy="0.5" r="0.78">
+      <stop offset="0.55" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="1" stop-color="#000000" stop-opacity="0.34"/>
+    </radialGradient>
+    <filter id="soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="28"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="800" fill="url(#turf)"/>
+  <rect width="1200" height="800" fill="url(#mow)"/>
+
+  <!-- svet (yoritish) -->
+  <ellipse cx="200" cy="140" rx="330" ry="190" fill="url(#light)" filter="url(#soft)"/>
+  <ellipse cx="1000" cy="140" rx="330" ry="190" fill="url(#light)" filter="url(#soft)"/>
+
+  <!-- darvozalar -->
+  <rect x="28" y="352" width="26" height="96" rx="3" fill="#f4fff8" fill-opacity="0.85"/>
+  <rect x="1146" y="352" width="26" height="96" rx="3" fill="#f4fff8" fill-opacity="0.85"/>
+
+  <!-- maydon chiziqlari -->
+  <g fill="none" stroke="#f4fff8" stroke-opacity="0.9" stroke-width="6" stroke-linecap="round">
+    <rect x="56" y="176" width="1088" height="448" rx="4"/>
+    <path d="M600 176v448"/>
+    <circle cx="600" cy="400" r="86"/>
+
+    <!-- chap darvoza maydoni -->
+    <rect x="56" y="296" width="156" height="208"/>
+    <rect x="56" y="344" width="64" height="112"/>
+    <path d="M212 352a26 26 0 0 1 0 96"/>
+
+    <!-- o'ng darvoza maydoni -->
+    <rect x="988" y="296" width="156" height="208"/>
+    <rect x="1080" y="344" width="64" height="112"/>
+    <path d="M988 352a26 26 0 0 0 0 96"/>
+  </g>
+
+  <!-- nuqtalar -->
+  <g fill="#f4fff8" fill-opacity="0.92">
+    <circle cx="600" cy="400" r="7"/>
+    <circle cx="156" cy="400" r="6"/>
+    <circle cx="1044" cy="400" r="6"/>
+  </g>
+
+  <text x="1132" y="740" text-anchor="end" font-family="Segoe UI, Roboto, sans-serif" font-size="46" font-weight="700" letter-spacing="3" fill="#ffffff" fill-opacity="0.5">7 × 7</text>
+
+  <rect width="1200" height="800" fill="url(#vignette)"/>
+</svg>

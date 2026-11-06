@@ -25,8 +25,28 @@ CREATE TABLE IF NOT EXISTS bookings (
   hours INTEGER NOT NULL,
   total_price INTEGER NOT NULL,
   status TEXT NOT NULL DEFAULT 'pending',
+  payment_method TEXT NOT NULL DEFAULT 'arrival',
+  payment_status TEXT NOT NULL DEFAULT 'unpaid',
+  paid_at TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+-- Payme / Click tranzaksiyalari
+CREATE TABLE IF NOT EXISTS payments (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  booking_id INTEGER NOT NULL REFERENCES bookings(id),
+  provider TEXT NOT NULL,
+  provider_trans_id TEXT,
+  amount INTEGER NOT NULL,
+  state INTEGER NOT NULL DEFAULT 0,
+  create_time INTEGER NOT NULL,
+  perform_time INTEGER,
+  cancel_time INTEGER,
+  reason INTEGER
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_payments_trans ON payments(provider, provider_trans_id);
+CREATE INDEX IF NOT EXISTS idx_payments_booking ON payments(booking_id);
 
 CREATE INDEX IF NOT EXISTS idx_bookings_field_date ON bookings(field_id, date);
 CREATE INDEX IF NOT EXISTS idx_bookings_user ON bookings(user_id);
@@ -35,16 +55,16 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_bookings_unique_slot
 
 -- Boshlang'ich maydonlar (faqat bo'sh baza uchun)
 INSERT INTO fields (name, address, price_per_hour, open_time, close_time, image_url)
-SELECT 'Markaziy maydon', 'Chilonzor, Bunyodkor 12', 120000, '07:00', '23:00',
-       'https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=800&q=60'
-WHERE NOT EXISTS (SELECT 1 FROM fields WHERE name = 'Markaziy maydon');
+SELECT 'Futbol maydoni — svet bilan', 'Nurobod tumani, Ibrohim Ota qishlog‘i', 100000, '00:00', '00:00',
+       '/field-7x7.svg'
+WHERE NOT EXISTS (SELECT 1 FROM fields WHERE name LIKE 'Futbol maydoni%');
 
-INSERT INTO fields (name, address, price_per_hour, open_time, close_time, image_url)
-SELECT 'Yoshlar sport majmuasi', 'Yunusobod, Amir Temur 108', 95000, '08:00', '22:00',
-       'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&q=60'
-WHERE NOT EXISTS (SELECT 1 FROM fields WHERE name = 'Yoshlar sport majmuasi');
+-- Saytga telefon raqami bilan kirgan foydalanuvchilar
+CREATE TABLE IF NOT EXISTS users (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  phone TEXT NOT NULL UNIQUE,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
 
-INSERT INTO fields (name, address, price_per_hour, open_time, close_time, image_url)
-SELECT 'Mini-futbol arena', 'Mirzo Ulug''bek, Mustaqillik 5', 150000, '09:00', '00:00',
-       'https://images.unsplash.com/photo-1518604666860-9ed391f76460?w=800&q=60'
-WHERE NOT EXISTS (SELECT 1 FROM fields WHERE name = 'Mini-futbol arena');
+CREATE UNIQUE INDEX IF NOT EXISTS idx_users_phone ON users(phone);

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api';
 import type { Field, Me } from '../types';
-import { formatPrice } from '../utils';
+import { formatPrice, formatWorkingHours } from '../utils';
 
 export default function FieldsView({ me, onSelect }: { me: Me; onSelect: (field: Field) => void }) {
   const [fields, setFields] = useState<Field[] | null>(null);
@@ -52,7 +52,7 @@ export default function FieldsView({ me, onSelect }: { me: Me; onSelect: (field:
           <div className="field__body">
             <h3 className="field__name">{field.name}</h3>
             {field.address && <p className="field__meta">📍 {field.address}</p>}
-            <p className="field__meta">🕒 {field.open_time} – {field.close_time}</p>
+            <p className="field__meta">🕒 {formatWorkingHours(field.open_time, field.close_time)}</p>
             <button className="btn btn--block" onClick={() => onSelect(field)}>
               Vaqtni tanlash
             </button>

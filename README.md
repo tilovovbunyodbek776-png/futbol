@@ -1,6 +1,8 @@
 # ⚽ Futbol Maydoni — Telegram Mini App
 
-Futbol maydonini onlayn bron qilish ilovasi: **Telegram Mini App** (React + Vite) + **Cloudflare Worker API** (Hono) + **D1 (SQLite)** baza va **admin panel**.
+Futbol maydonini onlayn bron qilish ilovasi: **oddiy veb-sayt** (React + Vite) + **Cloudflare Worker API** (Hono) + **D1 (SQLite)** baza va **admin panel**.
+
+Sayt brauzerda mustaqil ishlaydi (ism + telefon raqami bilan kirish), Telegram ichida esa **Mini App** sifatida ochilsa foydalanuvchi avtomatik aniqlanadi.
 
 ## Imkoniyatlar
 
@@ -9,6 +11,7 @@ Futbol maydonini onlayn bron qilish ilovasi: **Telegram Mini App** (React + Vite
 - 14 kunlik sana tanlash
 - Ish jadvali asosida avtomatik hisoblangan bo'sh vaqt slotlari (band va o'tgan vaqtlar bloklanadi)
 - 1–3 soatlik davomiylik, narx avtomatik hisoblanadi
+- To‘lov usuli: **Payme**, **Click** (onlayn) yoki **joyida to‘lash**
 - Ism va telefon raqami bilan bron yuborish
 - "Bronlarim" — faol bronlar, tarix va bekor qilish
 
@@ -38,11 +41,19 @@ npm run db:init      # lokal D1 bazani yaratadi va 3 ta namunaviy maydon qo'shad
 TELEGRAM_BOT_TOKEN=""      # @BotFather'dan olinadigan token
 ADMIN_PASSWORD="admin123"  # admin panel paroli
 ADMIN_IDS=""               # admin Telegram ID'lari, vergul bilan: "123456789,987654321"
-DEV_MODE="1"               # brauzerda sinash uchun (Telegramsiz "Mehmon" foydalanuvchisi)
+SESSION_SECRET="..."       # sayt sessiyasini imzolash kaliti (uzun, tasodifiy)
 TZ_OFFSET_MINUTES="300"    # UTC+5 (Toshkent)
+
+PAYME_MERCHANT_ID=""       # Payme merchant ID (web-kassa)
+PAYME_KEY=""               # Payme maxfiy kaliti
+CLICK_SERVICE_ID=""        # Click service_id
+CLICK_MERCHANT_ID=""       # Click merchant_id
+CLICK_SECRET_KEY=""        # Click maxfiy kaliti
+APP_URL=""                 # to‘lovdan keyin qaytadigan manzil
+PAYMENTS_SIMULATE="1"      # lokal sinovda soxta to‘lov sahifasi
 ```
 
-> `DEV_MODE="1"` faqat lokal sinov uchun. Ishga tushirishda `DEV_MODE="0"` qiling, aks holda Telegram imzosi bo'lmagan har qanday so'rov "Mehmon" sifatida qabul qilinadi.
+> `SESSION_SECRET` bo'sh bo'lsa `ADMIN_PASSWORD` ishlatiladi. Productionda alohida uzun tasodifiy qiymat qo'ying.
 
 ## 3. Ishga tushirish
 
@@ -53,7 +64,7 @@ npm run dev:api    # Worker + lokal D1 -> http://127.0.0.1:8787
 npm run dev:web    # Vite frontend    -> http://127.0.0.1:5173
 ```
 
-Brauzerda `http://127.0.0.1:5173` ni oching. Admin: pastdagi **Admin** tab → parol `admin123`.
+Brauzerda `http://127.0.0.1:5173` ni oching — ism va telefon raqami bilan kiring, Telegram shart emas. Admin: **Admin panel** → parol `admin123`.
 
 ## 4. Telegram botga ulash
 
@@ -76,9 +87,13 @@ Ikki yo'l:
 | Metod | Yo'l | Tavsif |
 |---|---|---|
 | GET | `/api/me` | Joriy foydalanuvchi va admin holati |
+| POST | `/api/auth/login` | Saytga kirish (ism + telefon) → sessiya tokeni |
 | GET | `/api/fields` | Faol maydonlar |
 | GET | `/api/fields/:id/slots?date=YYYY-MM-DD` | Kunlik bo'sh slotlar |
-| POST | `/api/bookings` | Bron yaratish |
+| POST | `/api/bookings` | Bron yaratish (to‘lov usuli bilan) |
+| POST | `/api/bookings/:id/pay` | To‘lov havolasi (Payme/Click) |
+| POST | `/api/payments/payme` | Payme Merchant API (Payme → server) |
+| POST/GET | `/api/payments/click` | Click SHOP API: prepare/complete |
 | GET | `/api/bookings/my` | Mening bronlarim |
 | POST | `/api/bookings/:id/cancel` | Bronni bekor qilish |
 | POST | `/api/admin/login` | Admin parol bilan kirish |
@@ -91,7 +106,17 @@ Ikki yo'l:
 
 `bookings` jadvali: `(field_id, date, start_time)` bo'yicha unique index — bir vaqtga ikki bron tushmaydi. Bron bekor qilinsa (`status = 'cancelled'`) indexdan chiqadi va vaqt yana bo'shaydi.
 
-## 8. Deploy
+## 8. To‘lovlarni ulash
+
+1. **Payme:** merchant kabinetda web-kassa yaratib, `PAYME_MERCHANT_ID` va `PAYME_KEY` ni oling. Merchant API manzili sifatida `https://<sayt>/api/payments/payme` ni ko‘rsating, account maydoni `booking_id`.
+2. **Click:** Shop API uchun `CLICK_SERVICE_ID`, `CLICK_MERCHANT_ID`, `CLICK_SECRET_KEY` ni oling. Prepare URL: `https://<sayt>/api/payments/click`, Complete URL: `https://<sayt>/api/payments/click`.
+3. To‘lovdan keyin foydalanuvchi `APP_URL` ga qaytadi.
+
+> `PAYMENTS_SIMULATE="1"` faqat lokal sinov uchun: Payme/Click o‘rniga soxta to‘lov sahifasi ochiladi. Productionda **albatta** `0` bo‘lsin.
+
+To‘lov tasdiqlanganda bron `payment_status = 'paid'` bo‘ladi, bekor qilinsa yana `unpaid` ga qaytadi. Har bir tranzaksiya `payments` jadvalida saqlanadi.
+
+## 9. Deploy
 
 Ishga tushirish uchun:
 
@@ -106,6 +131,12 @@ npx wrangler d1 create football-booking
 npx wrangler secret put TELEGRAM_BOT_TOKEN
 npx wrangler secret put ADMIN_PASSWORD
 npx wrangler secret put ADMIN_IDS
+npx wrangler secret put SESSION_SECRET
+npx wrangler secret put PAYME_MERCHANT_ID
+npx wrangler secret put PAYME_KEY
+npx wrangler secret put CLICK_SERVICE_ID
+npx wrangler secret put CLICK_MERCHANT_ID
+npx wrangler secret put CLICK_SECRET_KEY
 ```
 
-`DEV_MODE` ni productionda **hech qachon** `1` qilmang.
+`SESSION_SECRET` uzun va tasodifiy bo'lsin — u orqali sayt sessiyalari imzolanadi.
